@@ -30,7 +30,6 @@ do
         -C*) COLOR="\"$(echo "$1" | cut -d"=" -f"3-")\"" shift;;
         --color=*) COLOR="\"$(echo "$1" | cut -d"=" -f"2-")\"" shift;;
         -s|--stdin) STDIN="--stdin" shift;;
-        -s|--stdin) STDIN="--stdin" shift;;
         -h|--help) usage 0;;
         -*) usage 1;;
         *) break;;
