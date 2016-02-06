@@ -8,6 +8,7 @@
 #/ Usage: slack [--attach] [--channel=<channel>] [--stdin] ...
 #/   --attach            post to Slack with an attachment (defaults to fixed-width text)
 #/   --channel=<channel> post to this Slack channel (defaults to the integration's default channel)
+#/   --color=<color>     post to Slack with an color (e.g. good, warning, danger, or any hex color code(e.g. #ff0000))$
 #/   --stdin             capture standard input and include it as a heredoc
 
 set -e
@@ -25,6 +26,10 @@ do
         -c*) CHANNEL="\"$(echo "$1" | cut -c"3-")\"" shift;;
         --ch=*) CHANNEL="\"$(echo "$1" | cut -d"=" -f"2-")\"" shift;;
         --channel=*) CHANNEL="\"$(echo "$1" | cut -d"=" -f"2-")\"" shift;;
+        -C|--color) COLOR="\"$3\"" shift 3;;
+        -C*) COLOR="\"$(echo "$1" | cut -d"=" -f"3-")\"" shift;;
+        --color=*) COLOR="\"$(echo "$1" | cut -d"=" -f"2-")\"" shift;;
+        -s|--stdin) STDIN="--stdin" shift;;
         -s|--stdin) STDIN="--stdin" shift;;
         -h|--help) usage 0;;
         -*) usage 1;;
@@ -79,12 +84,18 @@ jsonify() {
 # is not the default behavior because the text isn't fixed-width.
 if [ "$ATTACH" ]
 then
+    if [ "$COLOR" ]; then
+      CLR="\"color\": $(echo "$COLOR" | cut -d"=" -f"2-")"
+    else
+      CLR=""
+    fi
     cat >"$TMP/data" <<EOF
 payload={
     "attachments": [
         {
             "fallback": "$QUOTED",
             "pretext": "$QUOTED",
+            $CLR,
             "mrkdwn_in": ["fallback", "pretext"],
             "fields": [
 EOF
